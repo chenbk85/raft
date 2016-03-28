@@ -1,0 +1,131 @@
+
+Leader 接受客户端的日志请求、复制给其他 Server，并且告诉 Servers 何时可以安全地把日志应用到状态机上。﻿
+
+
+状态：
+所有Server上持久存在的：
+currentTerm：最近的term（初始化0, 逐渐增大）
+votedFor：当前 term 内接收到投票的 candidateId
+log[]：日志实体；每条包含状态机的命令以及对应的leader term
+
+所有Server上可变的状态：
+commitIndex：已知的已提交的日志最高索引（index）
+lastApplied：已应用到状态机的日志最高索引
+
+在 Leader 上可变的状态：
+（选举后重新初始化）
+nextIndex[]：将要发送给每个 server 的下一条日志的 index。初始化是 leader
+	     最新的日志 index + 1
+matchIndex[]：已知的已复制给每个 server 的最高日志索引。初始为0,逐渐增大。
+
+
+
+RequestVoteRPC:
+参数：
+term：candidate的term
+candidateId
+lastLogIndex
+lastLogTerm
+结果：
+term：currentTerm，用于让candidate更新自己
+voteGranted：true表示投票通过
+接收者实现：
+1.如果 term < currentTerm，返回false
+2.如果 voteFor 是 null 或者是 candidateId，并且 candidate的log至少已经跟上了接收者的log，给予投票。
+
+
+AppendEntries RPC：
+参数：
+term： leader's term
+leaderId：
+prevLogIndex：
+prevLogTerm：
+entries[]：日志实体。心跳为空。为了提高效率可能一次发送多个
+leaderCommit：leader's commitIndex
+结果：
+term：currentTerm，用于leader更新自己
+success：如果folloer包含匹配 prevLogIndex 和 prevLogTerm的日志则为true
+接收者实现：
+1. 如果 item < currentTerm 回复 false
+2. 如果日志不包含匹配 prevLogIndex 和 prevLogTerm 条目
+3. 如果一个已经存在的日志和新的冲突（index一样，term不一样），删除已经存在的和它以后的
+4. 添加任何不存在的新条目
+5. 如果 leaderCommit > commitIndex，设置 commitIndex = min(leaderCommit, index of last new entry)
+
+servers的规则：
+所有Servers:
+1. 如果 commitIndex > lastApplied：增加 lastApplied，应用log[lastApplied]到状态机
+2. 如果 Rpc请求或者回应包含Term T > currentTerm：设置 currentTerm = T，身法转为follower
+
+Followers:
+- 回应 candidate 和 leaders 的 RPC请求
+- 如果选举时间超时，期间没有收到Leader的AppendEntries RPC，也没有给candidate投票，转变为candidate
+
+Candidate：
+- 一旦转变为candidate，开始选举
+  增加currentTerm
+  为自己投票
+  重置 election timer
+  发送 RequestVote RPCs 给所有其他服务
+- 如果接收到大多数的投票，成为Leader
+- 如果接收到AppendEntries RPC：成为 Follower
+- 如果选举超时：开始新的选举
+
+Leaders：
+- 发送心跳（空 AppendEntries）RPC给每个 server，防止选举超时
+- 如果接收到客户端的命令：增加条目到本地日志，应用到状态机后给客户端回复
+- 如果 last log index >= 某个follower的nextIndex：发送 AppendEntries RPC（携带从nextIndex开始的日志）
+  如果成功：更新follower的nextIndex和matchIndex
+  如果由于日志冲突失败：减小nextIndex然后重试
+- 如果存在一个N，N > commitIndex，大多数的 matchIndex[i] >= N，以及 log[N].term == currentTerm：设置 commitIndex = N
+
+
+
+
+选举安全：在给定的term内，最多只有一个leader被选举
+Leader Append-Only：Leader从不覆盖或删除自己的日志。只会添加
+Log Matching：如果两个日志有相同的 index 和 term，那么这两个日志就是一样的
+Leader Comleteness：如果一个日志条目在给定的term内被提交，那么这个条目存在所有高term Leader的日志中
+Sate Machine Safety：如果一个server已经应用了某个index的日志到虚拟机，不会有其他server应用相同index但内容不同的日志
+
+
+每个server对于给定的任期最多投一次票。
+candidate状态下，如果收到AppendEntries RPC,并且发送者leader的term不小于自己的，就会承认leader转为followe；
+如果小于，则拒绝这个RPC，继续保持 candidate 状态。
+
+为了避免同时多个server开始选举瓜分选票，election timeout采用随机化。
+这样大多数情况下只有一个server会发送election timeout。
+
+
+
+日志复制：
+leader收到客户端的命令在日志中添加一个新条目，然后并行发起 AppendEntries RPC给其他server来复制这个条目。
+当条目被安全地复制，leader应用于状态机然后返回执行结果给客户端client。
+如果follower崩溃、运行缓慢或者丢包，leader会重试AppendEtries RPCS。
+
+Leader决定什么时候可以安全地应用日志条目到状态机，这样的条目成为committed。
+raft保证committed的条目是持久的,最终会被所有可用的状态机执行。
+一个日志条目一旦复制给大多数，就可以成为committed。同时也会提交前面所有的条目，包括前任leader创建的。
+
+Leader跟踪将要committed的日志最大index，未来的AppendEntries RPCS（包括心跳）中会包含这个index。
+一旦follower知道一个日志条目是committed，它会把这个条目应用到本地的状态机。
+
+Raft维护着以下特性：
+- 如果两个条目有相同的index和term，则它们存储相同的command
+- 如果两个条目有相同的inddex和term，那么如果之前的日志条目也是一样的。
+
+冲突的日志条目，follower的会被leader的重写。
+
+
+InstallSnapshot RPC：
+leader向follower发送快照块数据
+参数：
+term：
+leaderId：
+lastIncludeIndex：
+lastIncludeTerm：
+offset：
+data：
+done：是否为last chunk
+结果：
+term： currentTerm，用于leader更新自己
