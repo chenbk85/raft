@@ -1,6 +1,5 @@
-#include "peer.h"
+#include "progress.h"
 
 namespace raft {
     
 } /* namespace raft  */ 
-

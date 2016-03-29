@@ -1,7 +1,7 @@
 set(raft_SRCS
     main.cpp
+    config.cpp
     servers/raft_server.cpp
-
     ${PROJECT_SOURCE_DIR}/src/proto/gen_cpp/raft.pb.cc
     ${PROJECT_SOURCE_DIR}/src/proto/gen_cpp/raft.grpc.pb.cc
     )
