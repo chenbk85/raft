@@ -43,7 +43,7 @@ include_directories(${PROTOBUF_INCLUDE_DIRS})
 
 # TODO: find grpc、find rotoc-gen-grpc executable
 
-include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/src)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
