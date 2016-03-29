@@ -2,6 +2,12 @@ syntax = "proto2";
 
 package raft;
 
+/*enum RaftState {*/
+    /*StateLeader     =   0;*/
+    /*StateFollower   =   1;*/
+    /*StateCandidate  =   2;*/
+/*}*/
+
 enum EntryType {
     EntryNormal     =   0;
     EntryConfChange =   1;

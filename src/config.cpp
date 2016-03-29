@@ -5,37 +5,47 @@
 
 namespace raft {
 
-Config::Config():
-    name("node0"),
-    listen_node_addr("0.0.0.0:3421"),
-    listen_client_addr("0.0.0.0:3422")
-{
-}
-
-static void printUsage() {
-    printf("Usage: \n");
+// 由节点名字生成一个唯一的id
+static uint64_t newID(const std::string& name) {
     //TODO:
+    return 1;
 }
 
-static bool parseNodeAddress(
+// 
+static bool parseClusterNodes(
         const std::string& str,
-        const std::string& exclude_self_name,
-        std::map<std::string, std::string>& addrs
+        const std::string& self_name,
+        std::map<uint64_t, std::tuple<std::string, std::string> > cluster_nodes
         ) {
     std::string s = str;
     std::regex expr("([\\w]+)=([^,]+)");
     std::smatch match;
 
     while (std::regex_search(s, match, expr)) {
-        if (match[1] != exclude_self_name) {
-            auto ret = addrs.emplace(match[1], match[2]);
+        if (match[1] != self_name) {
+            auto ret = cluster_nodes.emplace(newID(match[1]), std::make_tuple(match[1], match[2]));
             if (!ret.second)
                 std::cerr << "conflict node name in cmdline.(" << match[1] << ")"<< std::endl;
         }
         s = match.suffix().str();    
     }
-    
+
     return true;
+}
+
+
+Config::Config():
+    name("node0"),
+    id(newID(name)),
+    listen_node_addr("0.0.0.0:3421"),
+    listen_client_addr("0.0.0.0:3422"),
+    data_dir(name + ".raftdata")
+{
+}
+
+static void printUsage() {
+    printf("Usage: \n");
+    //TODO:
 }
 
 void Config::parseCommandLine(int argc, char** argv) {
@@ -79,14 +89,16 @@ void Config::parseCommandLine(int argc, char** argv) {
         }
     }
 
-    if(!parseNodeAddress(cluster_addrs, name, peer_nodes)) {
+    if(!parseClusterNodes(cluster_addrs, name, cluster_nodes)) {
         std::cerr << "Parse node address failed(invalid: " << cluster_addrs <<")" << std::endl;
         exit(EXIT_FAILURE);
     }
 
-    std::cout << "RaftNode: " << name << " <--> " << listen_node_addr << std::endl;
-    for (auto &e:peer_nodes) {
-        std::cout << "RaftNode: " << e.first << " <--> " << e.second << std::endl;
+    cluster_nodes.emplace(id, std::make_tuple(name, listen_node_addr));
+
+    for (auto &e:cluster_nodes) {
+        std::cout << "RaftNode " << std::get<0>(e.second) << ": " << e.first  << " <--> " 
+            << std::get<1>(e.second) << std::endl;
     }
 }
     
