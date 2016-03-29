@@ -9,6 +9,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(CXX_FLAGS
+    -std=c++11
     -Wall
     -Wextra
     #-Werror
@@ -32,13 +33,15 @@ else ()
     set(CMAKE_CXX_FLAGS_RELEASE "-O2 -finline-limit=1000 -DNDEBUG")
 endif()
 
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
-find_package(Boost REQUIRED log_setup log system thread random chrono date_time filesystem)                                                                                                                    
-include_directories(${Boost_INCLUDE_DIRS})
+#set(Boost_USE_STATIC_LIBS ON)
+#set(Boost_USE_MULTITHREADED ON)
+#find_package(Boost REQUIRED log_setup log system thread random chrono date_time filesystem)                                                                                                                    
+#include_directories(${Boost_INCLUDE_DIRS})
 
 find_package(Protobuf REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIRS})
+
+# TODO: find grpc、find rotoc-gen-grpc executable
 
 include_directories(${PROJECT_SOURCE_DIR})
 

@@ -1,1 +1,3 @@
 /build
+*.sw[pw]
+/src/proto/gen_cpp
