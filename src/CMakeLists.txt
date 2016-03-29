@@ -6,8 +6,6 @@ set(raft_SRCS
     ${PROJECT_SOURCE_DIR}/src/proto/gen_cpp/raft.grpc.pb.cc
     )
 
-
-
 set(grpc_LIBS
     grpc++
     grpc
@@ -17,6 +15,7 @@ set(depend_LIBS
     ${Boost_LIBRARIES}
     ${grpc_LIBS}
     ${PROTOBUF_LIBRARY}
+    ${OPENSSL_LIBRARIES}
     )
 
 

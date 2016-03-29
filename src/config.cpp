@@ -2,16 +2,30 @@
 #include <getopt.h>
 #include <iostream>
 #include <regex>
+#include <openssl/sha.h>
 
 namespace raft {
 
-// 由节点名字生成一个唯一的id
-static uint64_t newID(const std::string& name) {
-    //TODO:
-    return 1;
+// 由节点名字和地址生成一个唯一的id
+static uint64_t newID(const std::string& name, const std::string& addr) {
+    SHA_CTX ctx;
+    SHA1_Init(&ctx);
+
+    SHA1_Update(&ctx, name.c_str(), name.length());
+    SHA1_Update(&ctx, addr.c_str(), addr.length());
+
+    unsigned char hash[SHA_DIGEST_LENGTH];
+    SHA1_Final(hash, &ctx);
+
+    uint64_t id = hash[0];
+    for (size_t i = 1; i < 8; ++i) {
+        id = (id << 8) + hash[i];
+    }
+
+    return id;
 }
 
-// 
+// 地址格式：node1=127.0.0.1:12380,node2=127.0.0.1:22380,node3=127.0.0.1:32380
 static bool parseClusterNodes(
         const std::string& str,
         const std::string& self_name,
@@ -23,9 +37,10 @@ static bool parseClusterNodes(
 
     while (std::regex_search(s, match, expr)) {
         if (match[1] != self_name) {
-            auto ret = cluster_nodes.emplace(newID(match[1]), std::make_tuple(match[1], match[2]));
+            uint64_t id = newID(match[1], match[2]);
+            auto ret = cluster_nodes.emplace(id, std::make_tuple(match[1], match[2]));
             if (!ret.second)
-                std::cerr << "conflict node name in cmdline.(" << match[1] << ")"<< std::endl;
+                std::cerr << "conflict node id in cmdline.(" << match[1] << ")"<< std::endl;
         }
         s = match.suffix().str();    
     }
@@ -36,11 +51,12 @@ static bool parseClusterNodes(
 
 Config::Config():
     name("node0"),
-    id(newID(name)),
-    listen_node_addr("0.0.0.0:3421"),
-    listen_client_addr("0.0.0.0:3422"),
+    id(0),
+    listen_node_addr("0.0.0.0:2380"),
+    listen_client_addr("0.0.0.0:2379"),
     data_dir(name + ".raftdata")
 {
+    id = newID(name, listen_node_addr);
 }
 
 static void printUsage() {
