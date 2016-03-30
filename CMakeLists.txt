@@ -28,15 +28,19 @@ string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 set(CMAKE_CXX_COMPILER "g++")    
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 
-#set(Boost_USE_STATIC_LIBS ON)
-#set(Boost_USE_MULTITHREADED ON)
-#find_package(Boost REQUIRED log_setup log system thread random chrono date_time filesystem)                                                                                                                    
-#include_directories(${Boost_INCLUDE_DIRS})
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost REQUIRED system filesystem)                                                                                                                    
+include_directories(${Boost_INCLUDE_DIRS})
+
+find_package(OpenSSL REQUIRED)
+include_directories(${OPENSSL_INCLUDE_DIR})
 
 find_package(Protobuf REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 
-# TODO: find grpc、find rotoc-gen-grpc executable
+# TODO: find grpc、find protoc-gen-grpc executable
+# TODO: find leveldb
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 

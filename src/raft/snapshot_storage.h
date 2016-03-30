@@ -1,14 +1,16 @@
 #ifndef SNAPSHOT_STORAGE_H_GMCYWBTZ
 #define SNAPSHOT_STORAGE_H_GMCYWBTZ
+#include <string>
 
 namespace raft {
 
 class SnapShotStorage {
 public:
-    SnapShotStorage();
+    SnapShotStorage(const std::string& data_dir);
     ~SnapShotStorage();
 
 private:
+    const std::string snap_path_;
 };
     
 } /* namespace raft  */ 

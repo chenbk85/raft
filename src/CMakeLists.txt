@@ -2,6 +2,11 @@ set(raft_SRCS
     main.cpp
     config.cpp
     servers/raft_server.cpp
+    raft/local_node.cpp
+    raft/memory_storage.cpp
+    raft/persistent_storage.cpp
+    raft/progress.cpp
+    raft/snapshot_storage.cpp
     ${PROJECT_SOURCE_DIR}/src/proto/gen_cpp/raft.pb.cc
     ${PROJECT_SOURCE_DIR}/src/proto/gen_cpp/raft.grpc.pb.cc
     )
@@ -16,6 +21,7 @@ set(depend_LIBS
     ${grpc_LIBS}
     ${PROTOBUF_LIBRARY}
     ${OPENSSL_LIBRARIES}
+    leveldb
     )
 
 

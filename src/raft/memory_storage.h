@@ -1,5 +1,6 @@
 #ifndef MEMORY_STORAGE_H_8J26PHC3
 #define MEMORY_STORAGE_H_8J26PHC3
+#include <stdint.h>
 
 namespace raft {
 

@@ -1,5 +1,6 @@
 #ifndef PEER_NODE_H_CPVNWEYR
 #define PEER_NODE_H_CPVNWEYR
+#include <stdint.h>
 
 namespace raft {
 

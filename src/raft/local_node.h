@@ -1,6 +1,6 @@
 #ifndef LOCAL_NODE_H_XE5YSUG3
 #define LOCAL_NODE_H_XE5YSUG3
-#include "constants.h"
+#include "raft_types.h"
 
 namespace raft {
 
