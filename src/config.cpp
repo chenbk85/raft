@@ -39,8 +39,10 @@ static bool parseClusterNodes(
         if (match[1] != self_name) {
             uint64_t id = newID(match[1], match[2]);
             auto ret = cluster_nodes.emplace(id, std::make_tuple(match[1], match[2]));
-            if (!ret.second)
+            if (!ret.second) {
                 std::cerr << "conflict node id in cmdline.(" << match[1] << ")"<< std::endl;
+                return false;
+            }
         }
         s = match.suffix().str();    
     }

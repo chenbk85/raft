@@ -28,7 +28,7 @@ PersistentStorage::PersistentStorage(const std::string& dir):
 
     leveldb::Options options;
     options.create_if_missing = true;
-    leveldb::Status status = leveldb::DB::Open(options, "/tmp/testdb", &db_);
+    leveldb::Status status = leveldb::DB::Open(options, db_path_, &db_);
     if (!status.ok()) {
         std::cerr << "Open leveldb failed. (" << status.ToString() << ")" << std::endl;
         exit(EXIT_FAILURE);

@@ -48,6 +48,7 @@ void RaftServer::start(const std::string& listen_addr) {
     builder.AddListeningPort(listen_addr, grpc::InsecureServerCredentials());
     builder.RegisterService(&service_);
 
+    //TODO: exist if address already in use
     std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
     server->Wait();
 }

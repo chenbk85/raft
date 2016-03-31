@@ -3,6 +3,15 @@
 
 namespace raft {
 
+class Statemachine {
+public:
+    Statemachine();
+    ~Statemachine();
+
+private:
+    /* data */
+};
+
 } /* namespace raft  */ 
 
 

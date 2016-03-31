@@ -27,6 +27,7 @@ string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
 set(CMAKE_CXX_COMPILER "g++")    
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -finline-limit=1000 -DNDEBUG")
 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
