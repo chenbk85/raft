@@ -112,7 +112,8 @@ void Config::parseCommandLine(int argc, char** argv) {
         exit(EXIT_FAILURE);
     }
 
-    cluster_nodes.emplace(id, std::make_tuple(name, listen_node_addr));
+    std::cout << "RaftNode " << name << ": " << id  << " <--> " 
+        << listen_node_addr << std::endl;
 
     for (auto &e:cluster_nodes) {
         std::cout << "RaftNode " << std::get<0>(e.second) << ": " << e.first  << " <--> " 

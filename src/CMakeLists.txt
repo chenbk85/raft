@@ -8,6 +8,8 @@ set(raft_SRCS
     raft/progress.cpp
     raft/rpc_stub.cpp
     raft/snapshot_storage.cpp
+    raft/rpc/requests_queue.cpp
+    raft/rpc/response_puller.cpp
     ${PROJECT_SOURCE_DIR}/src/proto/gen_cpp/raft.pb.cc
     ${PROJECT_SOURCE_DIR}/src/proto/gen_cpp/raft.grpc.pb.cc
     )
@@ -23,6 +25,7 @@ set(depend_LIBS
     ${PROTOBUF_LIBRARY}
     ${OPENSSL_LIBRARIES}
     leveldb
+    pthread
     )
 
 
