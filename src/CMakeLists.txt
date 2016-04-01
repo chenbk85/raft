@@ -2,6 +2,7 @@ set(raft_SRCS
     main.cpp
     config.cpp
     servers/raft_server.cpp
+    support/timer.cpp
     raft/local_node.cpp
     raft/memory_storage.cpp
     raft/persistent_storage.cpp

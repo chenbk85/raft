@@ -2,11 +2,12 @@
 #define ASYNC_REQUEST_H_TYXN4HKM
 #include <grpc++/grpc++.h>
 #include "base_request.h"
+#include "support/timer.h"
 
 namespace raft {
 
 template <class REPLY>
-class AsyncReuqest {
+class AsyncReuqest : public BaseRequest, public Timeoutable {
 public:
     typedef std::function<void(const REPLY&, 
                                const grpc::status& status
@@ -16,11 +17,11 @@ public:
     AsyncReuqest(const CompelteCallback& cb) : complete_cb_(cb) {}
     ~AsyncReuqest() {}
 
-    virtual void onTimeout() {
+    virtual void onTimeout() override {
         ctx_.TryCancel();
     }
 
-    virtual void onFinish(bool ok) {
+    virtual void onFinish(bool ok) override {
         complete_cb_(reply_, ok ? status_ : grpc::Status(grpc::StatusCode::UNKNOWN));
     }
 
