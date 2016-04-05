@@ -23,7 +23,7 @@ public:
     TimeoutQueue ();
     ~TimeoutQueue ();
 
-    void push(std::shared_ptr<Timeoutable> t, int timeout_msec);
+    void push(const std::shared_ptr<Timeoutable>& t, int timeout_msec);
 
 private:
     void dispatch();

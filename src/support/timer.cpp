@@ -19,14 +19,18 @@ TimeoutQueue::~TimeoutQueue() {
     dispatch_thr_.join();
 }
 
-void TimeoutQueue::push(std::shared_ptr<Timeoutable> t, int timeout_msec) {
+void TimeoutQueue::push(const std::shared_ptr<Timeoutable>& t, int timeout_msec) {
     Timer timer{t, std::chrono::steady_clock::now() + std::chrono::milliseconds(timeout_msec) };
+    bool need_notify = false;
 
     {
         std::lock_guard<std::mutex> lock(mu_);
         q_.push(timer);
+        need_notify = q_.top().deadline == timer.deadline;
     }
-    cv_.notify_one();
+
+    if (need_notify)
+        cv_.notify_one();
 }
 
 
