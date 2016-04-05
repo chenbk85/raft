@@ -29,7 +29,7 @@ static uint64_t newID(const std::string& name, const std::string& addr) {
 static bool parseClusterNodes(
         const std::string& str,
         const std::string& self_name,
-        std::map<uint64_t, std::tuple<std::string, std::string> > cluster_nodes
+        std::map<uint64_t, std::tuple<std::string, std::string> >& cluster_nodes
         ) {
     std::string s = str;
     std::regex expr("([\\w]+)=([^,]+)");
@@ -56,7 +56,10 @@ Config::Config():
     id(0),
     listen_node_addr("0.0.0.0:2380"),
     listen_client_addr("0.0.0.0:2379"),
-    data_dir(name + ".raftdata")
+    data_dir(name + ".raftdata"),
+    election_timeout_ms(1000), // TODO
+    heartbeat_timeout_ms(200)  // TODO
+
 {
     id = newID(name, listen_node_addr);
 }

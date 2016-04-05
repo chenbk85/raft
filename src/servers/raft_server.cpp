@@ -1,4 +1,6 @@
 #include "raft_server.h"
+
+#include <iostream>
 #include <grpc++/grpc++.h>
 
 namespace raft {
@@ -49,9 +51,13 @@ void RaftServer::start(const std::string& listen_addr) {
     builder.RegisterService(&service_);
 
     //TODO: exist if address already in use
-    std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-    server->Wait();
+    server_ = builder.BuildAndStart();
+
+    std::cout << "RaftServer start listen on " << listen_addr << std::endl;
 }
 
+void RaftServer::wait() {
+    server_->Wait();
+}
 
 } /* namespace raft  */ 

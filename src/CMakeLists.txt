@@ -3,14 +3,15 @@ set(raft_SRCS
     config.cpp
     servers/raft_server.cpp
     support/timer.cpp
+    support/util.cpp
     raft/local_node.cpp
     raft/memory_storage.cpp
     raft/persistent_storage.cpp
     raft/progress.cpp
-    raft/rpc_stub.cpp
+    raft/raft_consensus.cpp
     raft/snapshot_storage.cpp
     raft/rpc/requests_queue.cpp
-    raft/rpc/response_puller.cpp
+    raft/rpc/rpc_stub.cpp
     ${PROJECT_SOURCE_DIR}/src/proto/gen_cpp/raft.pb.cc
     ${PROJECT_SOURCE_DIR}/src/proto/gen_cpp/raft.grpc.pb.cc
     )

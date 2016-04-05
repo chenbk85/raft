@@ -12,6 +12,8 @@ struct Config {
     std::string listen_client_addr;     // listen client request incoming
     std::map<uint64_t, std::tuple<std::string, std::string> > cluster_nodes;   // other nodes address. key: node id, value: <name, addr>
     std::string data_dir;
+    size_t election_timeout_ms;     // TODO
+    size_t heartbeat_timeout_ms;    // TODO
 
     Config();
     void parseCommandLine(int argc, char** argv);

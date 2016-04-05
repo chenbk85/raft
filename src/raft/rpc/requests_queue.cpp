@@ -1,14 +1,18 @@
 #include "requests_queue.h"
+#include <iostream>
 
 namespace raft {
 
 RequestsQueue::RequestsQueue() :
     next_seq_(1),
-    puller_(this)
-{}
+    pull_thr_(std::bind(&RequestsQueue::pullRoutine, this))
+{
+}
 
 RequestsQueue::~RequestsQueue() {
     //TODO: check remain
+    cq_.Shutdown();
+    pull_thr_.join();
 }
 
 uintptr_t RequestsQueue::push(const ReuqestPtr& r) {
@@ -32,8 +36,29 @@ void RequestsQueue::schedule(uintptr_t seq, bool ok) {
         }
     }
 
-    if (req)
-        req->onFinish(ok);
+    if (req) {
+        try {
+            req->onFinish(ok);
+        }
+        catch (...) {
+            //TODO
+        }
+    }
+}
+
+void RequestsQueue::pullRoutine() {
+    for ( ; ; ) {
+        void *tag = nullptr;
+        bool ok = false;
+        bool ret = cq_.Next(&tag, &ok);
+        if (ret) {
+            schedule(reinterpret_cast<uintptr_t>(tag), ok);
+        }
+        else {    //SHUTDOWN
+            std::cout << "Response puller routine end." << std::endl;
+            return;
+        }
+    }
 }
     
 } /* namespace raft  */ 

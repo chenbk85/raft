@@ -9,7 +9,7 @@ enum RaftState {
     StateFollower,
     StateCandidate
 };
-    
+
 } /* namespace raft  */ 
 
 

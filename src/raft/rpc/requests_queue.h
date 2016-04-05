@@ -3,8 +3,10 @@
 #include <memory>
 #include <mutex>
 #include <unordered_map>
+#include <thread>
+#include <grpc++/completion_queue.h>
+
 #include "base_request.h"
-#include "response_puller.h"
 
 namespace raft {
 
@@ -16,6 +18,13 @@ public:
     ~RequestsQueue();
 
     uintptr_t push(const ReuqestPtr& r);
+
+    grpc::CompletionQueue* cq() {
+        return &cq_;
+    }
+
+private:
+    void pullRoutine();
     void schedule(uintptr_t seq, bool ok);
 
 private:
@@ -23,7 +32,8 @@ private:
     std::unordered_map<uintptr_t, ReuqestPtr> requests_map_;
     uintptr_t next_seq_;
 
-    ResponsePuller puller_;
+    grpc::CompletionQueue cq_;   // grpc完成队列
+    std::thread pull_thr_;       // 论循grpc完成队列的线程
 };
     
 } /* namespace raft  */ 
