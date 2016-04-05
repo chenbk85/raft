@@ -4,7 +4,7 @@
 
 namespace raft {
 
-class PersistentStorage{
+class PersistentStorage {
 public:
     PersistentStorage(const std::string& dir);
     ~PersistentStorage();

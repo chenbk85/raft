@@ -3,33 +3,46 @@
 #include <memory>
 #include <chrono>
 #include <queue>
-#include <stdio.h>
+#include <mutex>
+#include <thread>
+#include <condition_variable>
 
 namespace raft {
 
 class Timeoutable {
 public:
-    Timer() {}
-    virtual ~Timer() {}
+    Timeoutable () {}
+    virtual ~Timeoutable () {}
 
     virtual void onTimeout() = 0;
 };
 
 
-class TimerDispatcher {
+class TimeoutQueue {
 public:
-    TimerDispatcher();
-    ~TimerDispatcher();
+    TimeoutQueue ();
+    ~TimeoutQueue ();
 
-    void push(const std::shared_ptr<Timeoutable>& t, int timeout_msec);
+    void push(std::shared_ptr<Timeoutable> t, int timeout_msec);
+
+private:
+    void dispatch();
 
 private:
     struct Timer {
         std::weak_ptr<Timeoutable> wp_entity;
         std::chrono::time_point<std::chrono::steady_clock> deadline;
+
+        bool operator>(const Timer& rhs) const {
+            return deadline > rhs.deadline;
+        }
     };
 
-    //TODO:
+    std::priority_queue<Timer, std::vector<Timer>, std::greater<Timer> > q_;
+    std::mutex mu_;
+    std::condition_variable cv_;
+    bool exit_;
+    std::thread dispatch_thr_;
 };
 
 
