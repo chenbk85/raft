@@ -11,12 +11,10 @@ int main(int argc, char *argv[])
     Config cfg;
     cfg.parseCommandLine(argc, argv);
 
-    RaftServer server;
-    server.start(cfg.listen_node_addr);
-
     raft::RaftConsensus rc(cfg);
 
-    server.wait();
+    RaftServer server(cfg.listen_node_addr, rc);
+    server.waitForExit();
 
     return 0;
 }

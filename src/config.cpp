@@ -58,7 +58,7 @@ Config::Config():
     listen_client_addr("0.0.0.0:2379"),
     data_dir(name + ".raftdata"),
     election_timeout_ms(1000), // TODO
-    heartbeat_timeout_ms(200)  // TODO
+    heartbeat_timeout_ms(400)  // TODO
 
 {
     id = newID(name, listen_node_addr);

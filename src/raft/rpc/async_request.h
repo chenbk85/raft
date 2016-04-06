@@ -26,7 +26,8 @@ public:
     }
 
     virtual void onFinish(bool ok) override {
-        complete_cb_(reply_, ok ? status_ : grpc::Status(grpc::StatusCode::UNKNOWN, ""));
+        if (complete_cb_)
+            complete_cb_(reply_, ok ? status_ : grpc::Status(grpc::StatusCode::UNKNOWN, ""));
     }
 
 

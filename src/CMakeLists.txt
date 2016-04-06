@@ -9,6 +9,7 @@ set(raft_SRCS
     raft/persistent_storage.cpp
     raft/progress.cpp
     raft/raft_consensus.cpp
+    raft/raft_types.cpp
     raft/snapshot_storage.cpp
     raft/rpc/requests_queue.cpp
     raft/rpc/rpc_stub.cpp

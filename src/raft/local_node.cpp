@@ -2,11 +2,12 @@
 
 namespace raft {
 
-LocalNode::LocalNode() {
-    // TODO:
+LocalNode::LocalNode():
+    leader(0),
+    state(StateFollower),
+    term(0),
+    votes(0)
+{
 }
 
-LocalNode::~LocalNode() {
-}
-    
 } /* namespace raft  */ 

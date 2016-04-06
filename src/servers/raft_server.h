@@ -6,26 +6,34 @@
 
 namespace raft {
 
+class RaftConsensus;
+
 class RaftServiceImpl: public RaftService::Service {
 public:
-    RaftServiceImpl();
+    RaftServiceImpl(RaftConsensus& rc);
     virtual ~RaftServiceImpl();
 
-    virtual ::grpc::Status RequesetVote(::grpc::ServerContext* context, const ::raft::VoteRequest* request, ::raft::VoteResponse* response);
-    virtual ::grpc::Status AppendEntries(::grpc::ServerContext* context, const ::raft::AppendEntriesRequest* request, ::raft::AppendEntriesResponse* response);
-    virtual ::grpc::Status InstallSnapShot(::grpc::ServerContext* context, const ::raft::InstallSnapShotRequest* request, ::raft::InstallSnapShotResponse* response);
+    virtual ::grpc::Status RequesetVote(::grpc::ServerContext* context, const ::raft::VoteRequest* request, ::raft::VoteResponse* response) override;
+    virtual ::grpc::Status AppendEntries(::grpc::ServerContext* context, const ::raft::AppendEntriesRequest* request, ::raft::AppendEntriesResponse* response) override;
+    virtual ::grpc::Status InstallSnapShot(::grpc::ServerContext* context, const ::raft::InstallSnapShotRequest* request, ::raft::InstallSnapShotResponse* response) override;
+
+private:
+    RaftConsensus& raft_consensus_;
 };
 
 class RaftServer {
 public:
-    RaftServer();
+    RaftServer(const std::string& listen_addr, RaftConsensus& rc);
     ~RaftServer();
 
-    void start(const std::string& listen_addr);
-    void wait();
+    void waitForExit();
 
 private:
-    RaftServiceImpl service_;
+    RaftServer(const RaftServer&) = delete;
+    RaftServer& operator=(const RaftServer) = delete;
+
+private:
+    RaftServiceImpl service_impl_;
     std::unique_ptr<grpc::Server> server_;
 };
     

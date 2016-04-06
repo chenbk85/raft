@@ -1,6 +1,7 @@
 #ifndef RAFT_TYPES_H_NCQISTAW
 #define RAFT_TYPES_H_NCQISTAW
 #include <stdint.h>
+#include <string>
 
 namespace raft {
 
@@ -9,6 +10,8 @@ enum RaftState {
     StateFollower,
     StateCandidate
 };
+
+std::string stateToString(RaftState state);
 
 } /* namespace raft  */ 
 

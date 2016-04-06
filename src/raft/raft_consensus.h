@@ -12,9 +12,20 @@ public:
     RaftConsensus(const Config& cfg);
     ~RaftConsensus();
 
+public:
+    void handleVoteRequest(const VoteRequest& req, VoteResponse* resp);
+    void handleAppendEntriesRequeset(const AppendEntriesRequest& req, AppendEntriesResponse* resp);
+    void handleInstallSnapShotRequest(const InstallSnapShotRequest& req, InstallSnapShotResponse* resp);
+
 private:
+    void handleVoteResponse(uint64_t src_term, const VoteResponse& resp, const grpc::Status& status);
+    void handleAppendEntriesResponse(const AppendEntriesResponse& resp, const grpc::Status& status);
+    void handleInstallSnapShotResponse(const InstallSnapShotResponse& resp, const grpc::Status& status);
+
+    bool checkTerm(uint64_t term, uint64_t leader);
+
     void becomeLeader();
-    void becomeFollower();
+    void becomeFollower(uint64_t term, uint64_t leader);
     void becomeCandidate();
 
 private:
@@ -29,8 +40,24 @@ private:
         RaftConsensus* parent_;
     };
 
+    struct HeartbeatTimer : public Timeoutable {
+        HeartbeatTimer(RaftConsensus *parent) : parent_(parent) {}
+        virtual void onTimeout() override {
+            parent_->onHeartbeatTimeout();
+        }
+
+        private:
+        RaftConsensus* parent_;
+    };
+
+
     void onElectionTimeout();
     void resetElectionTimer();
+    void removeElectionTimer();
+
+    void onHeartbeatTimeout();
+    void resetHeartbeatTimer();
+    void removeHeartbeatTimer();
 
 private:
     const Config& cfg_;
@@ -40,11 +67,14 @@ private:
     std::mutex mu_;
     uint64_t id_;
     uint64_t term_;
+    uint64_t leaderid_;
+    int votes_;
+    uint64_t vote_for_;
     RaftState state_;
-    const int half_nodes_;
-
+    const int majority_;
 
     std::shared_ptr<ElectionTimer> elect_timer_;
+    std::shared_ptr<HeartbeatTimer> heartbeat_timer_;
     TimeoutQueue timeout_queue_;
 };
     
